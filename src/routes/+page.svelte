@@ -4,30 +4,34 @@
     let showForm = true;
     let messages = [];
     let userMessage = '';
-    let selectedPatient = ''; // Para el legajo médico seleccionado
+    let selectedPatient = '';
     let loadingMessage = false;
-    let patientFileContent = ''; // Contenido del archivo de legajo seleccionado
+    let patientFileContent = '';
+    let isFirstMessage = true; // Nueva variable para controlar el scroll inicial
+    let messagesContainer;
+    let chatContainer;
+    let pageScrollPosition = 0; // Nueva variable para mantener la posición de la página
 
-    // Opciones de pacientes para el dropdown
+
     let patients = [
         { label: 'Legajo 1: Antonio Demo', value: 'demo1-ejemplo-fisioterapia.txt' },
         { label: 'Legajo 2 - Vacío', value: 'legajo2' },
         { label: 'Legajo 3 - Vacío', value: 'legajo3' }
     ];
 
-    let userName = 'Usuario'; // Asumimos que esta variable puede ser un nombre de usuario
-    let birthChartReport = ''; // Información adicional que puedas necesitar incluir
+    let userName = 'Usuario';
+    let birthChartReport = '';
 
     async function loadPatientFile() {
-        console.log('Función loadPatientFile llamada'); // Confirmación de que se llama a la función
-        console.log('Paciente seleccionado:', selectedPatient); // Verificar qué legajo se seleccionó
+        console.log('Función loadPatientFile llamada');
+        console.log('Paciente seleccionado:', selectedPatient);
 
         if (selectedPatient === 'demo1-ejemplo-fisioterapia.txt') {
             try {
                 const response = await fetch('/demo1-ejemplo-fisioterapia.txt');
                 if (response.ok) {
                     patientFileContent = await response.text();
-                    console.log('Contenido del legajo cargado:', patientFileContent); // Mostrar contenido cargado
+                    console.log('Contenido del legajo cargado:', patientFileContent);
                 } else {
                     console.error('Error al cargar el archivo del legajo');
                     patientFileContent = 'Error al cargar el archivo de legajo.';
@@ -37,13 +41,11 @@
                 patientFileContent = 'Error al conectar con el servidor para cargar el archivo.';
             }
         } else {
-            patientFileContent = ''; // Limpiar el contenido si se elige otro legajo
+            patientFileContent = '';
             console.log('Legajo vacío seleccionado, contenido limpiado');
         }
     }
 
-
-    // Validación del formulario
     function validateForm() {
         if (!selectedPatient) {
             alert('Por favor, selecciona un legajo médico.');
@@ -52,13 +54,23 @@
         return true;
     }
 
+    // Función para guardar la posición actual de la página
+    function saveScrollPosition() {
+        pageScrollPosition = window.scrollY;
+    }
+
+    // Función para restaurar la posición de la página
+    function restoreScrollPosition() {
+        window.scrollTo(0, pageScrollPosition);
+    }
+
     async function startChat() {
         if (!validateForm()) return;
 
+        saveScrollPosition(); // Guardamos la posición actual
         loadingMessage = true;
 
         try {
-            // Llamada al backend para cargar el documento del legajo seleccionado
             const response = await fetch('/api/loaddocument', {
                 method: 'POST',
                 headers: {
@@ -77,6 +89,12 @@
                     { role: 'assistant', content: 'Bienvenido al asistente médico virtual. ¿En qué puedo asistir en esta historia clínica?' }
                 ];
                 showForm = false;
+                isFirstMessage = true;
+                
+                // Esperamos al siguiente ciclo para restaurar la posición
+                setTimeout(() => {
+                    restoreScrollPosition();
+                }, 0);
             } else {
                 alert('Error al cargar el documento del legajo.');
             }
@@ -91,11 +109,10 @@
     async function sendMessage() {
         if (!userMessage.trim()) return;
 
-        // Añadir el mensaje del usuario al historial de mensajes
+        saveScrollPosition(); // Guardamos la posición actual de la página
         messages = [...messages, { role: 'user', content: userMessage }];
-
+        
         try {
-            // Realizar la llamada a la API con los datos proporcionados
             const response = await fetch('/api/verify', {
                 method: 'POST',
                 headers: {
@@ -104,15 +121,14 @@
                 body: JSON.stringify({
                     user: userName,
                     question: userMessage,
-                    token: 'mysecrettoken', // Token para autenticación o identificación
-                    history: messages,      // Historial de mensajes
-                    legajo: selectedPatient // Legajo médico seleccionado
+                    token: 'mysecrettoken',
+                    history: messages,
+                    legajo: selectedPatient
                 })
             });
 
             if (response.ok) {
                 const responseData = await response.json();
-                // Añadir la respuesta del asistente al historial de mensajes
                 messages = [...messages, { role: 'assistant', content: responseData.message }];
             } else {
                 const errorData = await response.json();
@@ -124,11 +140,9 @@
             messages = [...messages, { role: 'assistant', content: 'Lo siento, hubo un error de conexión. Por favor, verifica tu conexión e intenta nuevamente.' }];
         }
 
-        // Limpiar el mensaje del usuario
         userMessage = '';
+        isFirstMessage = false;
     }
-
-    let messagesContainer;
 
     onMount(() => {
         document.addEventListener('keypress', handleKeyPress);
@@ -137,20 +151,35 @@
         };
     });
 
+    afterUpdate(() => {
+        if (messagesContainer && !isFirstMessage) {
+            // Solo hacemos scroll en el contenedor de mensajes, no en toda la página
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Restauramos la posición de la página
+            restoreScrollPosition();
+        }
+    });
+
     function handleKeyPress(event: KeyboardEvent) {
         if (event.key === 'Enter' && !showForm) {
             sendMessage();
         }
     }
 
-    afterUpdate(() => {
-        if (messagesContainer) {
-            const lastMessage = messagesContainer.lastElementChild;
-            if (lastMessage) {
-                lastMessage.scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-    });
+
+    let sugerencias = [
+        '¿Desde cuándo presenta el paciente dolor en el hombro izquierdo, y cuál ha sido la evolución de los síntomas?',
+        '¿Existen antecedentes traumáticos, intervenciones previas o factores que puedan predisponer al paciente a esta condición?',
+        '¿Qué pruebas se han realizado para evaluar el dolor en el hombro y los síntomas asociados?',
+        '¿Qué factores en la historia clínica podrían haber agravado el dolor tras la realización de ejercicios como flexiones?',
+        '¿Cuáles son los hallazgos clínicos principales en la movilidad y el examen físico del hombro afectado?',
+        '¿Cuál es el diagnóstico inicial para el dolor de hombro, y qué hipótesis clínicas se están considerando?',
+        '¿Cuál es el plan terapéutico indicado actualmente para el dolor del paciente, y qué objetivos se esperan lograr?',
+        '¿Hay síntomas neurológicos asociados, como adormecimiento o pérdida de sensibilidad en la extremidad afectada?',
+        '¿Qué tipo de imágenes o pruebas adicionales están contempladas para este caso si no hay mejoría clínica?',
+        '¿Cuándo está programada la próxima revisión de seguimiento para evaluar la respuesta al tratamiento?'
+    ];
 </script>
 
 
@@ -203,6 +232,12 @@
                 <input type="text" bind:value={userMessage} placeholder="Escribe tu mensaje aquí..." />
                 <button on:click={sendMessage}>Enviar</button>
             </div>
+
+            <ul class="sugerencias-lista">
+                {#each sugerencias as sugerencia}
+                <li>{sugerencia}</li>
+                {/each}
+            </ul>
         </div>
     {/if}
 </section>
@@ -213,7 +248,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 20px;
+        padding: 0px 20px 20px 20px;
     }
 
     h1 {
@@ -226,7 +261,7 @@
 
     .form-container, .chat-container {
         width: 100%;
-        max-width: 600px;
+        max-width: 1000px;
         background: rgba(255, 255, 255, 0.9);
         padding: 20px;
         border-radius: 10px;
@@ -234,7 +269,7 @@
 
     .messages {
         width: 100%;
-        height: 300px;
+        height: 200px;
         margin-bottom: 20px;
         padding: 10px;
         overflow-y: auto;
