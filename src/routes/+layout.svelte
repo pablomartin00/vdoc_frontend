@@ -1,54 +1,40 @@
 <script>
-  import Header from './Header.svelte';
-  import '../app.css'; // Mantener tu app.css si lo necesitas
+  // Puedes agregar aquí tu lógica si es necesario.
 </script>
 
 <svelte:head>
-  <!-- Incluir el archivo output.css generado por Tailwind -->
   <link href="/output.css" rel="stylesheet" />
 </svelte:head>
 
-<div class="app">
-  <Header />
+<div class="w-full h-screen bg-gray-100 flex flex-col">
+  <!-- Header con altura fija -->
 
-  <main>
-    <slot />
-  </main>
+
+  <!-- Contenedor del panel principal (barra lateral + área principal) -->
+  <div class="flex flex-1 overflow-hidden">
+    <!-- Barra lateral -->
+    <nav class="bg-[#094199] w-16 p-4 flex-shrink-0">
+      <div class="mb-2.5">
+        <img src="/icon_1.png" alt="Icono 1" class="w-8 h-8">
+      </div>
+      <div class="mb-2.5">
+        <img src="/icon_2.png" alt="Icono 2" class="w-8 h-8">
+      </div>
+      <div class="mb-2.5">
+        <img src="/icon_3.png" alt="Icono 3" class="w-8 h-8">
+      </div>
+      <div>
+        <img src="/icon_4.png" alt="Icono 4" class="w-8 h-8">
+      </div>
+    </nav>
+
+
+
+
+
+    <!-- Contenedor principal para la página -->
+    <main class="flex-1 overflow-auto p-4">
+      <slot></slot>
+    </main>
+  </div>
 </div>
-
-<style>
-  .app {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-
-  main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    width: 100%;
-    max-width: 64rem;
-    margin: 0 auto;
-    box-sizing: border-box;
-  }
-
-  footer {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 12px;
-  }
-
-  footer a {
-    font-weight: bold;
-  }
-
-  @media (min-width: 480px) {
-    footer {
-      padding: 12px 0;
-    }
-  }
-</style>

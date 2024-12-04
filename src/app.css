@@ -1,107 +1,95 @@
-@import '@fontsource/fira-mono';
-
-:root {
-	--font-body: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-		Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+/* Cargar la fuente Poppins desde el archivo local */
+@font-face {
+	font-family: 'Poppins';
+	src: url('/fonts/Poppins-Regular.ttf') format('truetype');
+	font-weight: 400;
+	font-style: normal;
+  }
+  
+  /* :root define variables globales, incluyendo la fuente predeterminada */
+  :root {
+	--font-body: 'Poppins', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 	--font-mono: 'Fira Mono', monospace;
-	--color-bg-0: rgb(202, 216, 228);
 	--color-bg-1: hsl(209, 36%, 86%);
 	--color-bg-2: hsl(224, 44%, 95%);
 	--color-theme-1: #ff3e00;
-	--color-theme-2: #4075a6;
 	--color-text: rgba(0, 0, 0, 0.7);
-	--column-width: 42rem;
-	--column-margin-top: 4rem;
-	font-family: var(--font-body);
-	color: var(--color-text);
-}
-
-body {
-	min-height: 100vh;
+  }
+  
+  /* Estilos globales para el HTML y el body */
+  html, body {
+	height: 100%; /* Asegura que el body ocupe el 100% de la altura */
+	overflow-x: hidden; /* Evita desbordamientos horizontales */
 	margin: 0;
-	background-attachment: fixed;
-	background-color: var(--color-bg-1);
-	background-size: 100vw 100vh;
-	background-image: radial-gradient(
-			50% 50% at 50% 50%,
-			rgba(255, 255, 255, 0.75) 0%,
-			rgba(255, 255, 255, 0) 100%
-		),
-		linear-gradient(180deg, var(--color-bg-0) 0%, var(--color-bg-1) 15%, var(--color-bg-2) 50%);
-}
-
-h1,
-h2,
-p {
-	font-weight: 400;
-}
-
-p {
-	line-height: 1.5;
-}
-
-a {
-	color: var(--color-theme-1);
-	text-decoration: none;
-}
-
-a:hover {
-	text-decoration: underline;
-}
-
-h1 {
-	font-size: 2rem;
-	text-align: center;
-}
-
-h2 {
-	font-size: 1rem;
-}
-
-pre {
-	font-size: 16px;
-	font-family: var(--font-mono);
-	background-color: rgba(255, 255, 255, 0.45);
-	border-radius: 3px;
-	box-shadow: 2px 2px 6px rgb(255 255 255 / 25%);
-	padding: 0.5em;
-	overflow-x: auto;
-	color: var(--color-text);
-}
-
-.text-column {
-	display: flex;
-	max-width: 48rem;
-	flex: 0.6;
-	flex-direction: column;
-	justify-content: center;
-	margin: 0 auto;
-}
-
-input,
-button {
-	font-size: inherit;
-	font-family: inherit;
-}
-
-button:focus:not(:focus-visible) {
-	outline: none;
-}
-
-@media (min-width: 720px) {
-	h1 {
-		font-size: 2.4rem;
-	}
-}
-
-.visually-hidden {
-	border: 0;
-	clip: rect(0 0 0 0);
-	height: auto;
-	margin: 0;
-	overflow: hidden;
 	padding: 0;
-	position: absolute;
-	width: 1px;
-	white-space: nowrap;
-}
+	background-color: var(--color-bg-1);
+	background-image: linear-gradient(180deg, var(--color-bg-1) 0%, var(--color-bg-2) 50%);
+	font-family: var(--font-body); /* Usar Poppins desde la variable */
+	color: var(--color-text);
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: stretch;
+  }
+  
+  /* Estilo base para contenedores */
+  .container {
+	display: flex;
+	width: 100%;
+	min-height: 100vh; /* Asegura que el contenedor ocupe al menos la altura de la ventana */
+	overflow: hidden; /* Evita el desbordamiento a nivel global */
+  }
+  
+  /* Panel izquierdo y derecho con estilo */
+  .left-panel, .right-panel {
+	flex: 1; /* Permite que los paneles crezcan según el contenido */
+	overflow-y: auto; /* Permite el desplazamiento si el contenido excede el tamaño del contenedor */
+  }
+  
+  .left-panel {
+	border-right: 2px solid #ccc;
+	flex-shrink: 0; /* Evita que se encoja */
+	flex-basis: 50%; /* Establece un tamaño base para el panel izquierdo */
+  }
+  
+  .right-panel {
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0; /* Evita que se encoja */
+	flex-basis: 50%; /* Establece un tamaño base para el panel derecho */
+	overflow-y: auto; /* Permite desplazamiento solo cuando es necesario */
+  }
+  
+  /* Cabecera de chat */
+  .chat-header {
+	background-color: #f3f3f3;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px;
+  }
+  
+  /* Contenedor de mensajes */
+  .messages-container {
+	flex: 1;
+	overflow-y: auto; /* Permite el desplazamiento si el contenido excede el tamaño del contenedor */
+	background-color: #DAD3CC;
+  }
+  
+  /* Contenedor de entrada */
+  .input-container {
+	background-color: #f3f3f3;
+	padding: 10px;
+  }
+  
+  /* Media queries para pantallas pequeñas */
+  @media (max-width: 768px) {
+	.container {
+	  flex-direction: column; /* En pantallas pequeñas, apila los paneles verticalmente */
+	}
+	.left-panel, .right-panel {
+	  width: 100%; /* Cada panel ocupa el 100% del ancho */
+	  flex-basis: auto; /* El ancho se adapta automáticamente */
+	}
+  }
+  
